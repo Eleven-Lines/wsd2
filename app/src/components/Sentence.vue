@@ -22,7 +22,7 @@ export default {
   computed: {
     color () {
       if (this.mostEmo == 0 && this.sentence.score[0] == 0) {
-        return "#2c3e50"
+        return "#444444"
       }
       return ["#C39A11",
               "#AFCA1A",

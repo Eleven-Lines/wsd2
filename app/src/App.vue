@@ -5,7 +5,7 @@
   .controls
     button(@click="fillData") Run
     button(@click="reset") Reset
-  Graph(:chart-data="datacollection")
+  Graph(:chart-data="datacollection" :options="options")
   .lyrics
     Sentence(v-for="(sentence, si) in parsedData.sentences"
             :key="si"
@@ -30,7 +30,14 @@ export default {
       lyrics: "",
       rawData: null,
       defaultData: {score: [0, 0, 0, 0, 0, 0, 0, 0], sentences: [], lyrics: ""},
-      selectedContent: null
+      selectedContent: null,
+      options: {
+        scale: {
+          pointLabels: {
+              fontColor: ["#C39A11", "#AFCA1A", "#67B841", "#2F7DC2", "#1D267C", "#8D4597", "#871C21", "#DD6B0D"],
+          },
+        },
+      }
     }
   },
   computed: {
