@@ -113,11 +113,11 @@ def calc_mrph_score(genkei: str, midasi: str, pos: str = None, case: str = None)
         形態素の品詞
         「名詞」や「形容詞」など
     """
-#     freq_result = freq_score(genkei)
+    freq_result = freq_score(genkei)
     result = d18_score(genkei)
 
-#     if pos and (pos == "名詞" or pos == "形容詞" or pos == "動詞"):
-#         return MorphemeScore(freq_result, midasi, genkei)
+    if freq_result.any():
+        return MorphemeScore(freq_result, midasi, genkei)
 
     if result.any() or not genkei:
         return MorphemeScore(result, midasi, genkei)
@@ -203,10 +203,10 @@ def calc_song_score(lyrics: str) -> np.ndarray:
         sentence_scores.append(sentence_score)
 
         score = sentence_score.score
-        normalized_score = score / sum(score)
 
     mean_score = sum([s.score for s in sentence_scores]) / len(sentence_scores)
-    lyrics_score = LyricsScore(mean_score, "", sentence_scores)
+    normalized_score = mean_score / sum(mean_score)
+    lyrics_score = LyricsScore(normalized_score, "", sentence_scores)
 
     return json.dumps(lyrics_score.to_dict())
 
