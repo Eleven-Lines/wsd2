@@ -2,12 +2,16 @@
 #app
   textarea(v-model="lyrics"
            placeholder="edit me")
-  button(@click="fillData") Run
+  .controls
+    button(@click="fillData") Run
+    button(@click="reset") Reset
   Graph(:chart-data="datacollection")
   .lyrics
     Sentence(v-for="(sentence, si) in parsedData.sentences"
             :key="si"
-            :sentence="sentence")
+            :sentence="sentence"
+            @morphemeActive="onActive"
+            @sentenceActive="onActive")
 </template>
 
 <script>
@@ -38,9 +42,9 @@ export default {
     },
     datacollection () {
       return {
-        labels: ["Joy", "Sadness", "Trust", "Disgust", "Fear", "Anger", "Suprise", "Anticipation"],
+        labels: ["Joy", "Trust", "Fear", "Suprise", "Sadness", "Disgust", "Anger", "Anticipation"],
         datasets: [{
-          label: "data",
+          label: this.content.label || "data",
           data: this.content.score
         }]
       }
@@ -50,6 +54,14 @@ export default {
     async fillData () {
       this.rawData = (await axios.post("http://localhost:8000", this.lyrics)).data
     },
+    onActive (score, midasi) {
+      this.selectedContent = {
+        score: score,
+        label: midasi
+      }
+    },
+    reset () {
+      this.selectedContent = null}
   }
 }
 </script>
@@ -68,4 +80,7 @@ export default {
 .small
   max-width: 300px
   margin:  150px auto
+.lyrics
+  height: 20rem
+  overflow: scroll
 </style>

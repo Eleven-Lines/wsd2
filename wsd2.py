@@ -8,10 +8,12 @@ from gensim.models import word2vec
 from pyknp import KNP, Bunsetsu
 
 dict_path = "d18_8d-level3-reduced.csv"
+freq_dict_path = "freq150.csv"
 model_path = "/Volumes/Macintosh_SD/data/latest-ja-word2vec-gensim-model/word2vec.gensim.model"
 
 knp = KNP()
 d18 = pd.read_csv(dict_path, index_col=0)
+freq_dict = pd.read_csv(freq_dict_path, index_col=0)
 model = word2vec.Word2Vec.load(model_path)
 
 emo_elements = d18.columns
@@ -62,11 +64,28 @@ def d18_score(word: str) -> np.ndarray:
     if word in d18.index:
         return d18.loc[word].values
     return np.zeros(emo_dim)
+def freq_score(word: str) -> np.ndarray:
+    """
+    頻出辞書からスコアを取得する
+
+    Parameters
+    ------------------
+    word: str
+        検索する語
+
+    Returns
+    ------------------
+    score: np.ndarray
+        頻出辞書のスコア、存在しなかった場合は零ベクトル
+    """
+    if word in freq_dict.index:
+        return freq_dict.loc[word].values
+    return np.zeros(emo_dim)
 def negate_emo(emo: np.ndarray) -> np.ndarray:
     """
     感情を反転させる
     """
-    return emo[[1, 0, 3, 2, 5, 4, 7, 6]]
+    return emo[[4, 5, 6, 7, 0, 1, 2, 3]]
 
 def preprocess_sentence(sentence: str) -> str:
     """
@@ -86,17 +105,26 @@ def calc_mrph_score(genkei: str, midasi: str, pos: str = None, case: str = None)
 
     Parameters
     ------------------
+    midasi: str
+        調べたい形態素の見出し
     genkei: str
         調べたい形態素の原型
     pos: str
         形態素の品詞
         「名詞」や「形容詞」など
     """
+#     freq_result = freq_score(genkei)
     result = d18_score(genkei)
+
+#     if pos and (pos == "名詞" or pos == "形容詞" or pos == "動詞"):
+#         return MorphemeScore(freq_result, midasi, genkei)
+
     if result.any() or not genkei:
         return MorphemeScore(result, midasi, genkei)
+
     if genkei[-1] == "だ":
         return calc_mrph_score(genkei[:-1], midasi)
+
     if pos and (pos == "名詞" or pos == "形容詞" or pos == "動詞"):
         # 発見できなかった場合、w2vから類似語を拾う
         try:
@@ -109,7 +137,6 @@ def calc_mrph_score(genkei: str, midasi: str, pos: str = None, case: str = None)
             print(f"No vocabulary for {genkei}", file=sys.stderr)
     # その他すべて0
     return MorphemeScore(result, midasi, genkei)
-
 def calc_sentence_score(sentence: str) -> SentenceScore:
     """
     文章のスコアを計算する
@@ -158,7 +185,6 @@ def calc_sentence_score(sentence: str) -> SentenceScore:
 #         print("----------------------------------")
     score =  sum(scores.values()) / len(scores)
     return SentenceScore(score, sentence, mrph_scores[::-1])
-
 def calc_song_score(lyrics: str) -> np.ndarray:
     """
     歌詞のスコアを計算する
@@ -201,4 +227,4 @@ if __name__ == "__main__":
     mean_score = sum([s.score for s in sentence_scores]) / len(sentence_scores)
     lyrics_score = LyricsScore(mean_score, "", sentence_scores)
     print(json.dumps(lyrics_score.to_dict()))
-    df.to_csv("result.csv")
+#     df.to_csv("result.csv")

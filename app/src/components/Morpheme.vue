@@ -21,6 +21,4 @@ export default {
 <style lang="sass">
 .morpheme
   display: inline-block
-.morpheme:hover
-  background: #cce5ff
 </style>

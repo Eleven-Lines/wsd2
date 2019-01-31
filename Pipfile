@@ -14,6 +14,7 @@ tensorflow = "*"
 pandas = "*"
 matplotlib = "*"
 falcon = "*"
+seaborn = "*"
 
 [dev-packages]
 
